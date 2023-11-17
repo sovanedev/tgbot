@@ -33,8 +33,6 @@ home_path = '/home/debian/tge320'
 json_file_path = os.path.join(home_path, 'agreed_users.json')
 DATABASE_URL = os.path.join(home_path, 'db.db')
 
-print(DATABASE_URL)
-
 os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
 os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)
 
@@ -1630,6 +1628,8 @@ async def send_log(e):
 
 if __name__ == '__main__':
     from aiogram import executor
+
+    send_log(DATABASE_URL)
 
     conn = sqlite3.connect(DATABASE_URL, check_same_thread=False)
 
