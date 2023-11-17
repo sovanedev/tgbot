@@ -138,6 +138,24 @@ async def cmd_unmakestaff(message: types.Message):
 
     await message.reply(f"{admin_mention} разжаловал модератора {user_mention}\.", parse_mode="MarkdownV2")
 
+@dp.message_handler(commands=['sosatchlen'])
+async def cmd_getid(message: types.Message):
+    if message.chat.type != types.ChatType.SUPERGROUP and message.chat.type != types.ChatType.GROUP:
+        await message.reply("Эта команда может быть использована только в групповых чатах.")
+        return
+    
+    admin = await bot.get_chat_member(e320_id, message.from_user.id)
+    admin_id = message.from_user.id
+    
+    user = await bot.get_chat_member(e320_id, message.reply_to_message.from_user.id)
+    user_id = message.reply_to_message.from_user.id
+
+    if not admin_id in crut_id:
+        await message.reply("Недостаточно прав.")
+        return
+    
+    if user.status in ["administrator"]:
+        await bot.restrict_chat_member(chat_id=e320_id, user_id=user_id,  can_send_media_messages=False, can_send_messages=False, can_send_other_messages=False, can_delete_messages=False, can_manage_chat=False, can_pin_messages=False, can_add_web_page_previews=False)
 
 @dp.message_handler(commands=['getid'])
 async def cmd_getid(message: types.Message):
