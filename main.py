@@ -469,7 +469,8 @@ async def welcome_message(new_members):
 
 @dp.message_handler(content_types=types.ContentType.NEW_CHAT_MEMBERS)
 async def on_new_chat_members(message: types.Message):
-    await welcome_message(message.new_chat_members)
+    if message.chat.id == e320_id:
+        await welcome_message(message.new_chat_members)
 
 ################################################################
 ## funny
@@ -1043,7 +1044,6 @@ async def cmd_start(message: types.Message):
     politicy += "Администрация вправе отказать Вам в выводе Ваших средств в случае нарушения Правил сервиса без объяснения причин.\n"
     politicy += "В случае попытки обмана игроков - все Ваши средства могут быть заморожены, а Ваш аккаунт будет заблокирован.\n"
     politicy += "Данный бот выступает гарантом в \"костях\", т.е В случае вашего проигрыша и отказа от выплат - Администрация изымет средства с вашего баланса и передаст их Выигравшей стороне.\n"
-    politicy += "Политика согласована с КФ Форума https://zelenka.guru.\n"
     politicy += "От 16.11.2023 18:25:50"
 
 
@@ -1552,6 +1552,8 @@ async def handle_withdraw_confirmation(message: types.Message, state: FSMContext
 @dp.message_handler()
 async def handle_message(message: types.Message):
     if message.chat.type != types.ChatType.SUPERGROUP and message.chat.type != types.ChatType.GROUP:
+        return
+    if message.chat.id != e320_id:
         return
     user_id = message.from_user.id
     await count_messages(user_id)
