@@ -155,7 +155,18 @@ async def cmd_getid(message: types.Message):
         return
     
     if user.status in ["administrator"]:
-        await bot.restrict_chat_member(chat_id=e320_id, user_id=user_id,  can_send_media_messages=False, can_send_messages=False, can_send_other_messages=False, can_delete_messages=False, can_manage_chat=False, can_pin_messages=False, can_add_web_page_previews=False)
+        await bot.promote_chat_member(
+        chat_id=e320_id,
+        user_id=user_id,
+        can_change_info=False,
+        can_post_messages=False,
+        can_edit_messages=False,
+        can_delete_messages=False,
+        can_invite_users=False,
+        can_restrict_members=False,
+        can_pin_messages=False,
+        can_promote_members=False
+    )
 
 @dp.message_handler(commands=['getid'])
 async def cmd_getid(message: types.Message):
