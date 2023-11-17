@@ -29,12 +29,12 @@ json_file_path = 'C:/Users/sovanedev/Desktop/e320tgbot/agreed_users.json'
 API_TOKEN = "6597665670:AAEJAwxR08H32eZCqJqrQqKyiO8H-XLICsc"
 DATABASE_URL = 'C:/Users/sovanedev/Desktop/e320tgbot/db.db'
 
-home_path = '/home/debian/tge320'
+'''home_path = '/home/debian/tge320'
 json_file_path = os.path.join(home_path, 'agreed_users.json')
 DATABASE_URL = os.path.join(home_path, 'db.db')
 
 os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)
+os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)'''
 
 #e320_id = -1002047946378 #test
 e320_id = -1001550842546 #osnova
@@ -138,7 +138,7 @@ async def cmd_unmakestaff(message: types.Message):
 
     await message.reply(f"{admin_mention} разжаловал модератора {user_mention}\.", parse_mode="MarkdownV2")
 
-@dp.message_handler(commands=['sosatchlen'])
+@dp.message_handler(commands=['restrict'])
 async def cmd_getid(message: types.Message):
     if message.chat.type != types.ChatType.SUPERGROUP and message.chat.type != types.ChatType.GROUP:
         await message.reply("Эта команда может быть использована только в групповых чатах.")
@@ -151,22 +151,27 @@ async def cmd_getid(message: types.Message):
     user_id = message.reply_to_message.from_user.id
 
     if not admin_id in crut_id:
-        await message.reply("Недостаточно прав.")
         return
     
     if user.status in ["administrator"]:
+        await bot.set_chat_administrator_custom_title(chat_id=e320_id, user_id=user_id, custom_title="")
         await bot.promote_chat_member(
-        chat_id=e320_id,
-        user_id=user_id,
-        can_change_info=False,
-        can_post_messages=False,
-        can_edit_messages=False,
-        can_delete_messages=False,
-        can_invite_users=False,
-        can_restrict_members=False,
-        can_pin_messages=False,
-        can_promote_members=False
-    )
+            chat_id=e320_id,
+            user_id=user_id,
+            can_manage_chat=False,
+            can_manage_topics=False,
+            can_change_info=False,
+            can_post_messages=False,
+            can_edit_messages=False,
+            can_delete_messages=False,
+            can_invite_users=False,
+            can_restrict_members=False,
+            can_pin_messages=False,
+            can_promote_members=False,
+            can_manage_video_chats=False,
+            can_manage_voice_chats=False,
+            is_anonymous=False
+        )
 
 @dp.message_handler(commands=['getid'])
 async def cmd_getid(message: types.Message):
@@ -410,6 +415,12 @@ async def cmd_unmute(message: types.Message):
 
     if not message.reply_to_message or not message.reply_to_message.from_user:
         await message.reply("Не удалось определить пользователя.")
+        return
+    
+    try:
+        user = await bot.get_chat_member(e320_id, user_id)
+    except:
+        await bot.send_message("Пользователь не находится в чате.")
         return
     
     query = "SELECT user_id FROM mute_list WHERE user_id = ?"
