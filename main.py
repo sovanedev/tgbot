@@ -29,12 +29,12 @@ json_file_path = 'C:/Users/sovanedev/Desktop/e320tgbot/agreed_users.json'
 API_TOKEN = "6597665670:AAEJAwxR08H32eZCqJqrQqKyiO8H-XLICsc"
 DATABASE_URL = 'C:/Users/sovanedev/Desktop/e320tgbot/db.db'
 
-home_path = '/home/debian/tge320'
+'''home_path = '/home/debian/tge320'
 json_file_path = os.path.join(home_path, 'agreed_users.json')
 DATABASE_URL = os.path.join(home_path, 'db.db')
 
 os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)
+os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)'''
 
 #e320_id = -1002047946378 #test
 e320_id = -1001550842546 #osnova
@@ -274,7 +274,7 @@ async def cmd_ban(message: types.Message):
         await message.reply("Данный пользователь является модератором.")
         return
 
-    _, dur, *reason = message.text.split()
+    _, *reason = message.text.split()
     reason = ' '.join(reason)
 
     await bot.ban_chat_member(e320_id, user_id=user_id)
@@ -502,6 +502,9 @@ async def welcome_message(new_members):
                 time_elapsed = datetime.utcnow() - datetime.utcfromtimestamp(profile['user_register_date'])
                 elapsed_days = time_elapsed.days
                 tosend_text += f"Дата регистрации: {reg_time} ({elapsed_days} д. назад)"
+                if profile['custom_fileds']['ban_reason']:
+                    tosend_text += "Пользователь забанен.\n"
+                    tosend_text += f"Причина бана: {profile['custom_fileds']['ban_reason']}\n"
             else:
                 tosend_text += "Профиль на zelenka.guru - не найден."
             await bot.send_message(e320_id, tosend_text, parse_mode="HTML")
@@ -639,6 +642,10 @@ async def lztprofile(message: types.Message):
             time_elapsed = datetime.utcnow() - datetime.utcfromtimestamp(profile['user_register_date'])
             elapsed_days = time_elapsed.days
             tosend_text += f"| Дата регистрации: {reg_time} ({elapsed_days} д. назад)\n"
+
+            if profile['custom_fileds']['ban_reason']:
+                    tosend_text += "Пользователь забанен.\n"
+                    tosend_text += f"Причина бана: {profile['custom_fileds']['ban_reason']}\n"
 
             #tosend_text += f"| Scammers: {'да' if scam else 'нет'}"
         else:
