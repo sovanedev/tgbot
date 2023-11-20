@@ -503,7 +503,7 @@ async def welcome_message(new_members):
                 elapsed_days = time_elapsed.days
                 tosend_text += f"Дата регистрации: {reg_time} ({elapsed_days} д. назад)"
                 
-                if profile['custom_fields']['ban_reason']:
+                if profile['custom_fields']['ban_reason'] is not None:
                     tosend_text += "Пользователь забанен.\n"
                     tosend_text += f"Причина бана: {profile['custom_fields']['ban_reason']}\n"
             else:
@@ -644,7 +644,7 @@ async def lztprofile(message: types.Message):
             elapsed_days = time_elapsed.days
             tosend_text += f"| Дата регистрации: {reg_time} ({elapsed_days} д. назад)\n"
 
-            if profile['custom_fields']['ban_reason']:
+            if profile['custom_fields']['ban_reason'] is not None:
                     tosend_text += "Пользователь забанен.\n"
                     tosend_text += f"Причина бана: {profile['custom_fields']['ban_reason']}\n"
 
