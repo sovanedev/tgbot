@@ -503,7 +503,7 @@ async def welcome_message(new_members):
                 elapsed_days = time_elapsed.days
                 tosend_text += f"Дата регистрации: {reg_time} ({elapsed_days} д. назад)"
                 
-                if 'custom_fields' in profile and 'ban_reason' in profile['custom_fields'] and profile['custom_fields']['ban_reason'] is not None:
+                if profile['custom_fields']['ban_reason']:
                     tosend_text += "Пользователь забанен.\n"
                     tosend_text += f"Причина бана: {profile['custom_fields']['ban_reason']}\n"
             else:
@@ -611,8 +611,8 @@ async def cleartop(message: types.Message):
         await message.reply("В базе данных нет информации о сообщениях пользователей.")
         return
     
-    conn.execute("DELETE FROM message_top")
-    conn.commit()
+    #conn.execute("DELETE FROM message_top")
+    #conn.commit()
 
 @dp.message_handler(commands=['lzt'])
 async def lztprofile(message: types.Message):
@@ -644,15 +644,15 @@ async def lztprofile(message: types.Message):
             elapsed_days = time_elapsed.days
             tosend_text += f"| Дата регистрации: {reg_time} ({elapsed_days} д. назад)\n"
 
-            if 'custom_fields' in profile and 'ban_reason' in profile['custom_fields'] and profile['custom_fields']['ban_reason'] is not None:
-                    tosend_text += "Пользователь забанен.\n"
-                    tosend_text += f"Причина бана: {profile['custom_fields']['ban_reason']}\n"
+            if 'custom_fields' in profile and 'ban_reason' in profile['custom_fields'] and profile['custom_fields']['ban_reason']:
+                tosend_text += "| Пользователь забанен.\n"
+                tosend_text += f"| Причина бана: {profile['custom_fields']['ban_reason']}\n"
 
             #tosend_text += f"| Scammers: {'да' if scam else 'нет'}"
         else:
             tosend_text += "Профиль не найден."
         
-        await bot.send_message(e320_id, tosend_text, "HTML", disable_web_page_preview=True, protect_content=True)
+        await bot.send_message(message.chat.id, tosend_text, "HTML", disable_web_page_preview=True, protect_content=True)
 
 @dp.message_handler(commands=['rules'])
 async def rules(message: types.Message):
@@ -1140,6 +1140,52 @@ def read_agreed_users():
 def write_agreed_users(agreed_users):
     with open(json_file_path, 'w') as file:
         json.dump({'users': agreed_users}, file)
+
+def read_proxies():
+    try:
+        with open('gived_proxies.json', 'r') as file:
+            proxies = json.load(file)
+    except FileNotFoundError:
+        proxies = {}
+    return proxies
+
+def write_proxies(proxies):
+    with open('gived_proxies.json', 'w') as file:
+        json.dump(proxies, file)
+
+@dp.message_handler(commands=["proxy"])
+async def cmd_proxy(message: types.Message):
+    user_id = message.from_user.id
+    proxies = read_proxies()
+
+    try:
+        user = await bot.get_chat_member(-1002129487113, user_id)
+    except Exception as e:
+        print(e)
+        await bot.send_message(user_id, "Прокси доступны только трафферам.")
+        return
+
+    if str(user_id) in proxies:
+        user_proxies = proxies[str(user_id)]
+        chosen_proxy_type = user_proxies.get('chosen_proxy_type')
+        chosen_proxy = user_proxies.get('chosen_proxy')
+
+        await bot.send_message(user_id, f"Ваши прокси: <code>{chosen_proxy}</code> - {chosen_proxy_type}", parse_mode="HTML")
+    else:
+        proxy_types = ['http', 'socks']
+        chosen_proxy_type = random.choice(proxy_types)
+
+        with open(f'{chosen_proxy_type}.txt', 'r') as file:
+            proxy_list = file.read().splitlines()
+
+        if not proxy_list:
+            await bot.send_message(user_id, f"Извините, нет доступных прокси типа {chosen_proxy_type}.")
+            return
+
+        chosen_proxy = random.choice(proxy_list)
+        proxies[str(user_id)] = {'chosen_proxy_type': chosen_proxy_type, 'chosen_proxy': chosen_proxy}
+        write_proxies(proxies)
+        await bot.send_message(user_id, f"Ваши прокси: <code>{chosen_proxy}</code> ({chosen_proxy_type})", parse_mode="HTML")
 
 @dp.callback_query_handler(lambda c: c.data.startswith('agree'))
 async def handle_agree_button(callback_query: types.CallbackQuery):
@@ -1678,8 +1724,6 @@ async def send_log(e):
 
 if __name__ == '__main__':
     from aiogram import executor
-
-    send_log(DATABASE_URL)
 
     conn = sqlite3.connect(DATABASE_URL, check_same_thread=False)
 
