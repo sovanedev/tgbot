@@ -1,15 +1,9 @@
-
-
-#bot = Bot(token="6597665670:AAEJAwxR08H32eZCqJqrQqKyiO8H-XLICsc")
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import ChatPermissions, BotCommandScopeAllPrivateChats, BotCommand
-import asyncpg
 import sqlite3
 from datetime import datetime, timedelta
 from LolzteamApi import LolzteamApi, Types
-from aiogram.utils import exceptions
-from aiogram.types import Dice, CallbackQuery
 
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -28,13 +22,13 @@ json_file_path = 'C:/Users/sovanedev/Desktop/e320tgbot/agreed_users.json'
 
 API_TOKEN = "6597665670:AAEJAwxR08H32eZCqJqrQqKyiO8H-XLICsc"
 DATABASE_URL = 'C:/Users/sovanedev/Desktop/e320tgbot/db.db'
-
+'''
 home_path = '/home/debian/tge320'
 json_file_path = os.path.join(home_path, 'agreed_users.json')
 DATABASE_URL = os.path.join(home_path, 'db.db')
 
 os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)
+os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)'''
 
 #e320_id = -1002047946378 #test
 e320_id = -1001550842546 #osnova
@@ -559,20 +553,29 @@ async def count_messages(user_id):
 @dp.message_handler(commands=['top10'])
 async def command_top_10(message: types.Message):
 
-    cursor.execute("SELECT user_id, message_count FROM message_top ORDER BY message_count DESC LIMIT 10")
+    cursor.execute("SELECT user_id, message_count FROM message_top ORDER BY message_count DESC LIMIT 15")
     top_users = cursor.fetchall()
 
     if top_users:
         top_users_text = "Топ 10 пользователей по сообщениям:\n"
-        for index, (user_id, message_count) in enumerate(top_users, start=1):
+        top = 0
+        index = 1
+        for user_id, message_count in top_users:
             user_info = await bot.get_chat_member(e320_id, user_id)
             
-            escaped_username = user_info.user.username.replace('_', r'\_') if user_info.user.username else "Удалён"
-            user_name = f"[{escaped_username}](https://t.me/{escaped_username})" if user_info.user.username else f"Удалён"
+            if user_info.user.username is None:
+                continue
+
+            escaped_username = user_info.user.username.replace('_', r'\_')
+            user_name = f"[{escaped_username}](https://t.me/{escaped_username})"
 
             top_users_text += f"{index}\. {user_name} \- {message_count} сообщений\n"
+            index += 1
+            top += 1
+            if top >= 10:
+                break
 
-        await message.reply(top_users_text, parse_mode="MarkdownV2", disable_web_page_preview=True, disable_notification=True, )
+        await message.reply(top_users_text, parse_mode="MarkdownV2", disable_web_page_preview=True, disable_notification=True)
     else:
         await message.reply("В базе данных нет информации о сообщениях пользователей.")
 
@@ -611,8 +614,8 @@ async def cleartop(message: types.Message):
         await message.reply("В базе данных нет информации о сообщениях пользователей.")
         return
     
-    #conn.execute("DELETE FROM message_top")
-    #conn.commit()
+    conn.execute("DELETE FROM message_top")
+    conn.commit()
 
 @dp.message_handler(commands=['lzt'])
 async def lztprofile(message: types.Message):
@@ -1719,7 +1722,7 @@ async def send_log(e):
     try:
         await bot.send_message(chat_id=6388329805, text=str(e), parse_mode="MarkdownV2")
     except Exception as ex:
-        await bot.send_message(chat_id=6388329805, text=str(e))
+        await bot.send_message(chat_id=6388329805, text=f"{str(ex)}, {e}")
 
 
 if __name__ == '__main__':
