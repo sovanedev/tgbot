@@ -617,8 +617,8 @@ async def cleartop(message: types.Message):
         await message.reply("В базе данных нет информации о сообщениях пользователей.")
         return
     
-    #conn.execute("DELETE FROM message_top")
-    #conn.commit()
+    conn.execute("DELETE FROM message_top")
+    conn.commit()
 
 @dp.message_handler(commands=['lzt'])
 async def lztprofile(message: types.Message):
