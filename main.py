@@ -12,6 +12,7 @@ import uuid
 
 import json
 import time
+
 import random
 
 import os
@@ -31,10 +32,10 @@ os.makedirs(os.path.dirname(DATABASE_URL), exist_ok=True)
 
 #e320_id = -1002047946378 #test
 e320_id = -1001550842546 #osnova
-crut_id = [670017160, 6388329805]
+crut_id = [670017160]
 ludik_id = -1002006881495 # ludik
 
-current_period = "11\.11\.23 \- 01\.12\.23"
+current_period = "01\.12\.23 \- 01\.01\.24"
 
 lzt = LolzteamApi(token='1e2ab991b144467ccaf20900faa3a3a056520bfc')
 
@@ -600,9 +601,12 @@ async def cleartop(message: types.Message):
                 continue
             
             user_info = await bot.get_chat_member(e320_id, user_id)
-            
-            escaped_username = user_info.user.username.replace('_', r'\_')
-            user_name = f"[{escaped_username}](https://t.me/{escaped_username})" if user_info.user.username else f"{user_info.user.full_name}"
+
+            if not user_info.user.username:
+                user_name = f"[{user_info.user.first_name}](tg://resolve?id={user_info.user.id})"
+            else:
+                escaped_username = user_info.user.username.replace('_', r'\_')
+                user_name = f"[{escaped_username}](https://t.me/{escaped_username})"
 
             top_users_text += f"{index}\. {user_name} \- {message_count} сообщений\n"
             index += 1
@@ -613,8 +617,8 @@ async def cleartop(message: types.Message):
         await message.reply("В базе данных нет информации о сообщениях пользователей.")
         return
     
-    conn.execute("DELETE FROM message_top")
-    conn.commit()
+    #conn.execute("DELETE FROM message_top")
+    #conn.commit()
 
 @dp.message_handler(commands=['lzt'])
 async def lztprofile(message: types.Message):
